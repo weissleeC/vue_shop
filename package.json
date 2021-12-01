@@ -1,5 +1,5 @@
 {
-  "name": "shop",
+  "name": "vue_shop",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,10 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "core-js": "^3.6.5",
+    "axios": "^0.24.0",
+    "core-js": "3",
+    "element-ui": "^2.15.6",
+    "eslint": "^8.1.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
