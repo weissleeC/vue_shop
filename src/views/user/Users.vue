@@ -47,11 +47,12 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180">
-          <template>
+          <template slot-scope="scope">
             <el-button
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="showEditDialog(scope.row.id)"
             ></el-button>
             <el-button
               type="danger"
@@ -117,6 +118,35 @@
           <el-button type="primary" @click="addUser">确 定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 修改用户 -->
+      <el-dialog
+        title="修改用户信息"
+        :visible.sync="editDialogVisible"
+        @close="editDialogClosed"
+      >
+        <el-form
+          :model="editForm"
+          :rules="editFormRules"
+          ref="editFormRef"
+          label-width="70px"
+          @close="addDialogClosed"
+        >
+          <el-form-item label="用户名">
+            <el-input v-model="editForm.username" :disabled="true"></el-input>
+          </el-form-item>
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="editForm.email"></el-input>
+          </el-form-item>
+          <el-form-item label="手机" prop="mobile">
+            <el-input v-model="editForm.mobile"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="editDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="editUserInfo">确定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -134,15 +164,18 @@ export default {
       }
     }
     return {
+      dialogVisible: false, // 添加用户
+      editDialogVisible: false, // 编辑用户
       queryInfo: {
+        // 分页
         query: '',
         pagenum: 1,
         pagesize: 10,
       },
-      userlist: [],
+      userlist: [], // 用户列表
       total: 0,
-      dialogVisible: false,
       addForm: {
+        // 添加用户
         username: '',
         password: '',
         email: '',
@@ -167,6 +200,24 @@ export default {
             trigger: 'blur',
           },
         ],
+        email: [
+          { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+          {
+            type: 'email',
+            message: '请输入正确的邮箱地址',
+            trigger: 'blur',
+          },
+        ],
+        mobile: [
+          {
+            required: true,
+            validator: checkMobile,
+            trigger: 'blur',
+          },
+        ],
+      },
+      editForm: {},
+      editFormRules: {
         email: [
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
           {
@@ -212,6 +263,33 @@ export default {
         this.$message.success(res.meta.msg)
         this.getUsersList()
         this.dialogVisible = false
+      })
+    },
+
+    // 编辑用户
+    async showEditDialog(id) {
+      const { data: res } = await this.$http.get(`users/${id}`)
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.editForm = res.data
+      this.editDialogVisible = true
+    },
+    editDialogClosed() {
+      this.$refs.editFormRef.resetFields()
+    },
+    editUserInfo() {
+      this.$refs.editFormRef.validate(async (valid) => {
+        if (!valid) return false
+        const { data: res } = await this.$http.put(
+          `users/${this.editForm.id}`,
+          {
+            email: this.editForm.email,
+            mobile: this.editForm.mobile,
+          }
+        )
+        if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+        this.$message.success(res.meta.msg)
+        this.getUsersList()
+        this.editDialogVisible = false
       })
     },
 
