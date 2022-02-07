@@ -58,6 +58,7 @@
               type="danger"
               icon="el-icon-delete"
               size="mini"
+              @click="removeUserByID(scope.row.id, scope.row.username)"
             ></el-button>
             <el-tooltip
               effect="dark"
@@ -147,6 +148,8 @@
           <el-button type="primary" @click="editUserInfo">确定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 删除用户 -->
     </el-card>
   </div>
 </template>
@@ -291,6 +294,30 @@ export default {
         this.getUsersList()
         this.editDialogVisible = false
       })
+    },
+
+    // 删除用户
+    removeUserByID(id, username) {
+      this.$confirm(`此操作将永久删除该用户: ${username}，是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          const { data: res } = await this.$http.delete(`users/${id}`)
+          if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          })
+          this.getUsersList()
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除',
+          })
+        })
     },
 
     // 分页功能
