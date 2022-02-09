@@ -17,8 +17,11 @@ body,
 }
 
 .el-table {
-  margin-top: 15px;
   font-size: 12px;
+}
+
+.el-row+.el-table {
+  margin-top: 15px;
 }
 
 .el-pagination {
